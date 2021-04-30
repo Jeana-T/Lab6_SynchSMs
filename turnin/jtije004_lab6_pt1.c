@@ -1,7 +1,7 @@
 /*	Author: lab
  *  Partner(s) Name: 
  *	Lab Section:
- *	Assignment: Lab #6  Exercise #2
+ *	Assignment: Lab #6  Exercise #1
  *	Exercise Description: [optional - include for your own benefit]
  *
  *	I acknowledge all content contained herein, excluding template or example
@@ -16,48 +16,20 @@
 volatile unsigned char TimerFlag = 0;
 unsigned long _avr_timer_M = 1;
 unsigned long _avr_timer_cntcurr = 0;
-
-enum STATES {start, beginLights, stopLights} STATE;
-
-unsigned char count = 0x00;
 unsigned char temp = 0x01;
-unsigned char input = 0x00;
 
-void beginGame() {
-	input = ~PINA;
+enum STATES {startLights} STATE;
 
+void lightDisplay() {
         switch(STATE) {
-		case start:
-			STATE = beginLights;
-			break;
-        	case beginLights:
-			PORTB = temp;
-
-			if (input == 0x01) {
-				STATE = stopLights;
-			}
-			else {
-				if (count < 0x03) {
-		     			count++;  		   //only want to do pattern of 3
-					temp = temp <<1;	   //temp must come in as 0x00? or 0x01
-				}
-        			else{
-					temp = 0x01;		   //connecting light of pattern
-					count = 0x00;		   //0x01 or 0x00
-					PORTB = 0X02;
-				}
-				STATE = beginLights;
-			}	
-			break;
-		case stopLights:
-			if (input == 0x01) {
-				STATE = beginLights;
-			}
-			else {
-				STATE = stopLights;
-			}
-			break;
-	}
+        	case startLights:
+                	PORTB = temp;
+	             	temp = temp << 1;	// PORTB = PORTB <<1;
+        	        if (temp > 0x04) {
+                	        temp = 0x01;
+	                }
+        	        break;
+                }
 }
 
 void TimerOn() {
@@ -98,11 +70,11 @@ void TimerSet(unsigned long M) {
 int main(void) {
 	DDRA = 0x00; PORTA = 0xFF;
         DDRB = 0xFF; PORTB = 0x00;
-        TimerSet(300);
+        TimerSet(1000);
         TimerOn();
         while (1) {
                 if(TimerFlag == 0x01) {
-			beginGame();
+			lightDisplay();
                 }
                 TimerFlag = 0;
         }
